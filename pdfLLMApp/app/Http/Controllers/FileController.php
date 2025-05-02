@@ -66,34 +66,35 @@
          }
 
          public function query(Request $request)
-         {
-             $request->validate([
-                 'query' => 'required|string|max:255',
-             ]);
+        {
+            $request->validate([
+                'query' => 'required|string|max:255',
+            ]);
 
-             try {
-                 $response = Http::timeout(60)->post("http://nginx:80/api/query", [
-                     'query' => $request->query,
-                 ]);
+            try {
+                \Log::info('Query payload sent to Python:', ['payload' => ['query' => $request->input('query')]]);
+                $response = Http::timeout(60)->post("http://nginx:80/api/query", [
+                    'query' => $request->input('query'),
+                ]);
 
-                 if ($response->successful()) {
-                     return back()->with([
-                         'query_result' => $response->json()['response'],
-                         'context' => $response->json()['context'] ?? null
-                     ]);
-                 }
+                if ($response->successful()) {
+                    return back()->with([
+                        'query_result' => $response->json()['response'],
+                        'context' => $response->json()['context'] ?? null
+                    ]);
+                }
 
-                 Log::error('Query service error', [
-                     'status' => $response->status(),
-                     'body' => $response->body(),
-                 ]);
-                 return back()->with('error', 'Failed to process query');
-             } catch (\Exception $e) {
-                 Log::error('Query error', [
-                     'message' => $e->getMessage(),
-                     'trace' => $e->getTraceAsString(),
-                 ]);
-                 return back()->with('error', 'An error occurred: ' . $e->getMessage());
-             }
-         }
+                Log::error('Query service error', [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+                return back()->with('error', 'Failed to process query');
+            } catch (\Exception $e) {
+                Log::error('Query error', [
+                    'message' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+                return back()->with('error', 'An error occurred: ' . $e->getMessage());
+            }
+        }
      }
