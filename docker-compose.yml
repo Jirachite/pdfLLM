@@ -56,7 +56,9 @@ services:
       - app-network
 
   postgres:
-    image: postgres:15
+    build:
+      context: ./docker/postgres
+      dockerfile: Dockerfile
     environment:
       POSTGRES_DB: pdfLLM
       POSTGRES_USER: pdfspear

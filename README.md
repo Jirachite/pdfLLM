@@ -3,6 +3,13 @@
 A tenant-aware, construction-focused document intelligence platform built with Laravel, FastAPI, and containerized microservices.
 
 ---
+# Change Log
+- Upload & Text Extraction
+- Nginx Configuration Fix
+
+
+---
+
 
 ## ✅ Phase 1: Dockerized Core (Completed)
 
