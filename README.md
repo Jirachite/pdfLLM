@@ -51,9 +51,15 @@ The final phase introduces intelligent, tenant-isolated Retrieval-Augmented Gene
 ## 📦 Setup
 
 ```bash
+#ollama set up
+Download and install ollama from ollama.com
+ollama pull mistral:7b
+
 # Clone the repo
 git clone https://github.com/ikantkode/pdfLLM.git
 cd pdfLLM
 
 # Start the app
 docker compose up --build
+
+localhost/upload (or whatever server you have it hosted on eg. 192.168.1.107/upload)
