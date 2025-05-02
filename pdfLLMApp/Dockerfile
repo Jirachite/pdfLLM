@@ -1,23 +1,29 @@
 FROM php:8.2-fpm
 
-# Install dependencies
 RUN apt-get update && apt-get install -y \
     libpq-dev \
-    libzip-dev \
-    && docker-php-ext-install pdo pdo_pgsql zip \
+    git \
+    curl \
+    zip \
+    unzip \
+    && docker-php-ext-install pdo_pgsql \
     && pecl install redis \
     && docker-php-ext-enable redis
 
-# Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/laravel
 
 COPY . .
 
-RUN composer install
+RUN composer install --no-dev --optimize-autoloader
 
-# Set permissions
 RUN chown -R www-data:www-data /var/www/laravel/storage /var/www/laravel/bootstrap/cache
+RUN chmod -R 775 /var/www/laravel/storage /var/www/laravel/bootstrap/cache
 
-CMD ["php-fpm"]
+RUN echo "[www]\nlisten = 0.0.0.0:9000" >> /usr/local/etc/php-fpm.d/zz-docker.conf
+
+RUN echo "#!/bin/bash\nchown -R www-data:www-data /var/www/laravel/storage /var/www/laravel/bootstrap/cache\nchmod -R 775 /var/www/laravel/storage /var/www/laravel/bootstrap/cache\nphp-fpm" > /start.sh
+RUN chmod +x /start.sh
+
+CMD ["/start.sh"]

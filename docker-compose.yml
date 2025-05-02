@@ -1,34 +1,24 @@
 services:
-  nginx:
-    image: nginx:latest
-    ports:
-      - "80:80"  # Changed from "8080:80"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./pdfLLMApp/public:/var/www/laravel/public
-    depends_on:
-      - laravel
-      - python
-    networks:
-      - app-network
-
   laravel:
     build:
       context: ./pdfLLMApp
       dockerfile: Dockerfile
-    environment:
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_DATABASE=${DB_DATABASE}
-      - DB_USERNAME=${DB_USERNAME}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-    depends_on:
-      - postgres
-      - redis
     volumes:
       - ./pdfLLMApp:/var/www/laravel
+      - laravel-storage:/var/www/laravel/storage/app/public
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - APP_KEY=base64:3Ms5zmf/nZ8mazGCJ+xemurlKi/gVflAK3II+bjpbpA=
+      - DB_CONNECTION=pgsql
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_DATABASE=pdfLLM
+      - DB_USERNAME=pdfspear
+      - DB_PASSWORD=Anubis-Sucks-1!234
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - PYTHON_HOST=python
     networks:
       - app-network
 
@@ -36,26 +26,41 @@ services:
     build:
       context: ./python
       dockerfile: Dockerfile
+    volumes:
+      - ./python:/app
+      - laravel-storage:/var/www/laravel/storage/app/public
     environment:
       - DB_HOST=postgres
       - DB_PORT=5432
-      - DB_DATABASE=${DB_DATABASE}
-      - DB_USERNAME=${DB_USERNAME}
-      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=pdfLLM
+      - DB_USER=pdfspear
+      - DB_PASSWORD=Anubis-Sucks-1!234
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - OLLAMA_HOST=192.168.1.107
+    networks:
+      - app-network
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    volumes:
+      - laravel-storage:/var/www/laravel/storage/app/public
     depends_on:
-      - postgres
-      - redis
+      - laravel
+      - python
     networks:
       - app-network
 
   postgres:
     image: postgres:15
     environment:
-      - POSTGRES_DB=${DB_DATABASE}
-      - POSTGRES_USER=${DB_USERNAME}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      POSTGRES_DB: pdfLLM
+      POSTGRES_USER: pdfspear
+      POSTGRES_PASSWORD: Anubis-Sucks-1!234
     volumes:
       - postgres-data:/var/lib/postgresql/data
     networks:
@@ -63,15 +68,13 @@ services:
 
   redis:
     image: redis:7
-    volumes:
-      - redis-data:/data
     networks:
       - app-network
+
+volumes:
+  laravel-storage:
+  postgres-data:
 
 networks:
   app-network:
     driver: bridge
-
-volumes:
-  postgres-data:
-  redis-data:
