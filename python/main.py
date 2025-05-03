@@ -42,6 +42,7 @@ model = SentenceTransformer("all-MiniLM-L6-v2")
 
 class QueryRequest(BaseModel):
     query: str
+    file_ids: list[int] = []
 
 def extract_text_from_pdf(file_path: str) -> str:
     text = ""
@@ -132,19 +133,27 @@ async def process_file(file: UploadFile = File(...)):
 
 @app.post("/query")
 async def query(request: QueryRequest):
+    logger.info(f"Received query payload: {request.dict()}")
     try:
         query_embedding = model.encode([request.query])[0]
         conn = psycopg2.connect(**db_params)
         cur = conn.cursor()
-        cur.execute(
-            """
+        
+        # Filter by file_ids if provided
+        query = """
             SELECT chunk_text, filename
             FROM chunks
-            ORDER BY embedding <-> %s::vector
-            LIMIT 5
-            """,
-            (query_embedding.tolist(),)
-        )
+            WHERE 1=1
+        """
+        params = []
+        if request.file_ids:
+            query += " AND file_id = ANY(%s)"
+            params.append(request.file_ids)
+        
+        query += " ORDER BY embedding <-> %s::vector LIMIT 5"
+        params.append(query_embedding.tolist())
+        
+        cur.execute(query, params)
         results = cur.fetchall()
         cur.close()
         conn.close()
@@ -154,7 +163,7 @@ async def query(request: QueryRequest):
             model="mistral:7b",
             prompt=f"Based on the following context, answer the query: {request.query}\n\nContext:\n{context}"
         )
-        return {"response": response["response"]}
+        return {"response": response["response"], "context": context}
 
     except Exception as e:
         logger.error(f"Error processing query: {e}")
