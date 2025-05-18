@@ -6,8 +6,6 @@ A tenant-aware, construction-focused document intelligence platform built with L
 # Change Log
 - Upload & Text Extraction
 - Nginx Configuration Fix
-
-
 ---
 
 
@@ -68,5 +66,8 @@ cd pdfLLM
 
 # Start the app
 docker compose up --build
+
+# Permissions Command:
+docker exec -it pdfllm-laravel-1 composer install
 
 localhost/upload (or whatever server you have it hosted on eg. 192.168.1.107/upload)

@@ -27,7 +27,6 @@ services:
       context: ./python
       dockerfile: Dockerfile
     volumes:
-      - ./python:/app
       - laravel-storage:/var/www/laravel/storage/app/public
     environment:
       - DB_HOST=postgres
@@ -73,9 +72,26 @@ services:
     networks:
       - app-network
 
+  pgadmin:
+    image: dpage/pgadmin4:8.12
+    environment:
+      PGADMIN_DEFAULT_EMAIL: pdfllm@yourock.com
+      PGADMIN_DEFAULT_PASSWORD: pdfLLMrox
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+    ports:
+      - "8087:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
 volumes:
   laravel-storage:
   postgres-data:
+  pgadmin-data:
 
 networks:
   app-network:
