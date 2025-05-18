@@ -1,0 +1,36 @@
+graph TD
+    A[User] -->|Access UI| B[Laravel + Bulma UI]
+    B -->|Proxy /| C[Nginx]
+    C -->|/| B
+    C -->|/api/| D[FastAPI]
+
+    subgraph File Upload
+        B -->|POST /upload| E[Generate Token]
+        E -->|POST /api/process| D
+        D -->|Extract Text| F{PDF, Excel, Word, Image}
+        F -->|pdfplumber, camelot, PyPDF2| G[Clean Text]
+        F -->|pandas| G
+        F -->|python-docx| G
+        F -->|pytesseract| G
+        G -->|pandoc| H[Markdown]
+        H -->|spaCy| I[Semantic Chunks]
+        I -->|all-MiniLM-L6-v2| J[Embeddings]
+        J -->|Store| K[Postgres + pgvector]
+        K -->|files, chunks| L[Upload Tokens]
+    end
+
+    subgraph Query Processing
+        B -->|POST /api/query| D
+        D -->|all-MiniLM-L6-v2| M[Query Embedding]
+        M -->|pgvector Top-10| K
+        K -->|Chunks| N[cross-encoder Re-rank]
+        N -->|Top-5 Chunks| O[Llama3.2:3b via Ollama]
+        O -->|Response| P[Redis Cache]
+        P -->|Cached Response| D
+        D -->|Response| B
+    end
+
+    C -->|Proxy /api/| D
+    D -->|Response| C
+    C -->|Render| B
+    B -->|Display| A
