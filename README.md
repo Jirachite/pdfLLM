@@ -4,7 +4,8 @@ A construction-focused document intelligence platform built with Laravel, FastAP
 
 ---
 # How It Works
-https://raw.githubusercontent.com/ikantkode/pdfLLM/refs/heads/main/mermaid-diagram-2025-05-18-175659.png
+![mermaid-diagram-2025-05-18-175659](https://github.com/user-attachments/assets/08cdc1f4-908a-4c40-8ff3-db4cd55defc6)
+
 ---
 # Change Log
 - File upload and text extraction (PDF, Excel, Word, images)
