@@ -3,7 +3,9 @@
 A construction-focused document intelligence platform built with Laravel, FastAPI, and containerized microservices. Processes and queries documents (PDF, Excel, Word, images) with a local Retrieval-Augmented Generation (RAG) pipeline.
 
 ---
-
+# How It Works
+https://raw.githubusercontent.com/ikantkode/pdfLLM/refs/heads/main/mermaid-diagram-2025-05-18-175659.png
+---
 # Change Log
 - File upload and text extraction (PDF, Excel, Word, images)
 - Semantic chunking and embedding with `all-MiniLM-L6-v2`
